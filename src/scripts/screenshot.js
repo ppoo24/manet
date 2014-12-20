@@ -109,13 +109,33 @@
 
         setTimeout(function () {
             try {
-                var renderOptions = {
+			
+				//zcs=>Support dom capture
+				if (isPhantomJs() && options.selector) {
+					var selector = options.selector;
+					//---get the dom's boundary
+					var clipRect = page.evaluate(function (sel) {
+						try {
+							return document.querySelector(sel).getBoundingClientRect();
+						} catch (e) {
+							return null;
+						}
+					}, selector);
+					if (!clipRect) { throw new Error('Error: Can\'t find selector: ' + selector); }
+					page.clipRect = {
+						top: clipRect.top,
+						left: clipRect.left,
+						width: clipRect.width,
+						height: clipRect.height
+					};
+				}
+				//<=zcs
+				
+                page.render(outputFile, {
                     onlyViewport: !!options.height,
                     quality: quality,
                     format: format
-                };
-
-                page.render(outputFile, renderOptions);
+                });
 
                 log('Rendered screenshot: ' + outputFile);
                 onFinish(page);
