@@ -17,7 +17,11 @@ var _ = require('lodash'),
 
 function outputFile(options, conf, base64) {
     var format = options.format || DEF_FORMAT;
-    return conf.storage + path.sep + base64 + '.' + format;
+	//zcs=>The base64's length is too long for a file name, so we should fix the length
+	var filename = 'manettemp_' + (base64 + '').substr(-20) + '_' + Date.now() + '_' + Math.floor(Math.random() * (999999 - 100000) + 100000);
+	//<=zcs
+    // return conf.storage + path.sep + base64 + '.' + format; //zcs=old line
+	return conf.storage + path.sep + filename + '.' + format;
 }
 
 function cliCommand(config) {
