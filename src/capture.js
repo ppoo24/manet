@@ -6,6 +6,7 @@ var _ = require('lodash'),
     path = require('path'),
     imagemin = require('imagemin'),
     utils = require('./utils'),
+	crypto = require('crypto'),
 
     SCRIPT_FILE = 'scripts/screenshot.js',
 
@@ -16,10 +17,17 @@ var _ = require('lodash'),
 
 /* Configurations and options */
 
+function md5 (data, digest) {
+	if (!digest) { digest = 'hex'; } //default printing: normal hex chars
+	if (digest === 'buffer') { digest = undefined; }
+	if (typeof data === 'string') data = new Buffer(data);
+	return crypto.createHash('md5').update(data).digest(digest);
+}
+
 function outputFile(options, conf, base64) {
     var format = options.format || DEF_FORMAT;
 	//zcs=>The base64's length is too long for a file name, so we should fix the length
-	var filename = 'manettemp_' + (base64 + '').substr(-20) + '_' + Date.now() + '_' + Math.floor(Math.random() * (999999 - 100000) + 100000);
+	var filename = 'manettemp_' + md5(base64 + '') + '_' + Date.now() + '_' + Math.floor(Math.random() * (999999 - 100000) + 100000);
 	//<=zcs
     // return conf.storage + path.sep + base64 + '.' + format; //zcs=old line
 	return conf.storage + path.sep + filename + '.' + format;
