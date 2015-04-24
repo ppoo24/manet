@@ -4,6 +4,7 @@ var _ = require('lodash'),
     fs = require('fs-extra'),
     logger = require('winston'),
     path = require('path'),
+    imagemin = require('imagemin'),
     utils = require('./utils'),
 
     SCRIPT_FILE = 'scripts/screenshot.js',
@@ -37,6 +38,26 @@ function cleanupOptions(options, config) {
 }
 
 
+/* Image processing */
+
+function minimizeImage(src, dest, cb) {
+    var imin = new imagemin()
+        .src(src)
+        .dest(dest)
+        .use(imagemin.jpegtran({progressive: true}))
+        .use(imagemin.optipng({optimizationLevel: 3}))
+        .use(imagemin.gifsicle({interlaced: true}))
+        .use(imagemin.svgo());
+
+    imin.run(function (err) {
+        if (err) {
+            logger.error(err);
+        }
+        cb();
+    });
+}
+
+
 /* Screenshot capturing runner */
 
 function runCapturingProcess(options, config, outputFile, base64, onFinish) {
@@ -47,8 +68,17 @@ function runCapturingProcess(options, config, outputFile, base64, onFinish) {
             timeout: config.timeout
         };
 
-    logger.debug('Options for script: %j, base64: %s', options, base64);
-    utils.execProcess(cmd, opts, onFinish);
+    logger.debug('Options for script: %s, base64: %s', JSON.stringify(options), base64);
+
+    utils.execProcess(cmd, opts, function(code) {
+        if (config.compress) {
+            minimizeImage(outputFile, config.storage, function() {
+                onFinish(code);
+            });
+        } else {
+            onFinish(code);
+        }
+    });
 }
 
 
@@ -72,7 +102,7 @@ function screenshot(options, config, onFinish) {
 
     logger.info('Capture site screenshot: %s', options.url);
 
-    if (options.force) {
+    if (options.force || !config.cache) {
         retrieveImageFromSite();
     } else {
         fs.exists(file, function (exists) {

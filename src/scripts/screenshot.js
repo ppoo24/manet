@@ -2,7 +2,7 @@
 (function () {
 "use strict";
 
-    /* Constants */
+    /* Modules & Constants */
 
     var DEF_ZOOM = 1,
         DEF_QUALITY = 1,
@@ -12,7 +12,8 @@
         DEF_JS_ENABLED = true,
         DEF_IMAGES_ENABLED = true,
         DEF_FORMAT = 'png',
-        DEF_HEADERS = {};
+        DEF_HEADERS = {},
+        DEF_STYLES = 'body { background: #fff; }';
 
 
     /* Common functions */
@@ -22,7 +23,8 @@
     }
 
     function argument(index) {
-        return isPhantomJs() ? phantom.args[index] : system.args[index];
+        var delta = isPhantomJs() ? 1 : 0;
+        return system.args[index + delta];
     }
 
     function log(message) {
@@ -79,9 +81,13 @@
         return (cr && cr.top && cr.left && cr.width && cr.height) ? cr : null;
     }
 
-    function pageQuality(options) {
-        var quality = def(options.quality, DEF_QUALITY);
-        return isPhantomJs() ? (quality * 100) : quality;
+    function pageQuality(options, format) {
+        // XXX: Quality parameter doesn't work for PNG files.
+        if (format !== 'png') {
+            var quality = def(options.quality, DEF_QUALITY);
+            return isPhantomJs() ? String(quality * 100) : quality;
+        }
+        return null;
     }
 
     function createPage(options) {
@@ -105,7 +111,7 @@
     function renderScreenshotFile(page, options, outputFile, onFinish) {
         var delay = def(options.delay, DEF_DELAY),
             format = def(options.format, DEF_FORMAT),
-            quality = pageQuality(options);
+            quality = pageQuality(options, format);
 
         setTimeout(function () {
             try {
@@ -150,11 +156,16 @@
             var options = parseOptions(base64),
                 page = createPage(options);
 
-            page.open(options.url, function () {
-                try {
-                    renderScreenshotFile(page, options, outputFile, onFinish);
-                } catch (e) {
-                    onFinish(page, e);
+            page.open(options.url, function (status) {
+                if (status !== 'success') {
+                    exit();
+                } else {
+                    try {
+                        addStyles(page, DEF_STYLES);
+                        renderScreenshotFile(page, options, outputFile, onFinish);
+                    } catch (e) {
+                        onFinish(page, e);
+                    }
                 }
             });
         } catch (e) {
@@ -162,6 +173,18 @@
         }
     }
 
+    function addStyles(page, styles) {
+        page.evaluate(function(styles) {
+            var style = document.createElement('style'),
+                content = document.createTextNode(styles),
+                head = document.head;
+
+            style.setAttribute('type', 'text/css');
+            style.appendChild(content);
+
+            head.insertBefore(style, head.firstChild);
+        }, styles);
+    }
 
     /* Fire starter */
 

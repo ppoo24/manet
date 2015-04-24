@@ -58,11 +58,13 @@ function createSchema() {
         cache: joi
             .number()
             .integer()
-            .min(1)
             .label('Cache life time'),
         cleanup: joi
             .boolean()
             .label('Cleanup storage at startup'),
+        compress: joi
+            .boolean()
+            .label('Compress screenshots'),
         whitelist: joi
             .array()
             .default([])
@@ -70,14 +72,20 @@ function createSchema() {
     });
 }
 
+function defaultConfigPath() {
+    return utils.filePath(DEF_CONFIG);
+}
+
 function load() {
-    var config = nconf.argv()
+    var confPath = defaultConfigPath(),
+        config = nconf.argv()
         .env()
         .file({
-            file: utils.filePath(DEF_CONFIG)
+            file: confPath
         })
         .get();
 
+    config.cache = Math.max(config.cache, 0);
     config.storage = path.resolve(config.storage || os.tmpdir());
 
     return config;
@@ -99,6 +107,7 @@ function read() {
 /* Exported functions */
 
 module.exports = {
+    defaultConfigPath: defaultConfigPath,
     createSchema: createSchema,
     read: read
 };

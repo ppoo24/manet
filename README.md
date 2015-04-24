@@ -1,5 +1,5 @@
 
-# Manet [![Build Status](https://img.shields.io/travis/vbauer/manet.svg)](https://travis-ci.org/vbauer/manet) [![NPM](https://img.shields.io/npm/v/manet.svg)](https://www.npmjs.org/package/manet)
+# Manet [![Build Status](https://img.shields.io/travis/vbauer/manet.svg)](https://travis-ci.org/vbauer/manet) [![Heroku](https://heroku-badge.herokuapp.com/?app=manet)](https://manet.herokuapp.com) [![Dependency Status](https://david-dm.org/vbauer/manet.png)](https://david-dm.org/vbauer/manet) [![NPM](https://img.shields.io/npm/v/manet.svg)](https://www.npmjs.org/package/manet)
 
 > There is only one true thing: instantly paint what you see. When you've got it, you've got it. When you haven't, you begin again. All the rest is humbug.
 
@@ -113,13 +113,19 @@ Rules of overriding:
   <dd>File storage for cache (default is global temp directory).</dd>
 
   <dt>--cache</dt>
-  <dd>Lifetime for file cache in seconds. Screenshots are cached for *60 minutes by default*, so that frequent requests for the same screenshot don't slow the service down. You can configure longer life for cache items or make them ethereal (use no-positive value, <= 0)</dd>
+  <dd>Lifetime for file cache in seconds. Screenshots are cached for *60 minutes by default*, so that frequent requests for the same screenshot don't slow the service down. You can configure longer life for cache items or make them ethereal (use zero or negative value).</dd>
+
+  <dt>--cleanup</dt>
+  <dd>Remove FS storage on server startup (default is false).</dd>
+
+  <dt>--compress</dt>
+  <dd>Additional compression for captured screenshots using <a href="https://github.com/imagemin/imagemin">Imagemin</a> (default is false). File sizes are significantly reduced due to this, but it requires additional processing time.</dd>
 
   <dt>--silent</dt>
   <dd>Run Manet server with or without logging information (default is false).</dd>
 
   <dt>--level</dt>
-  <dd>Setting the level for your logging message. Possible values: debug, info, silly, warn, error (default is "debug").</dd>
+  <dd>Setting the level for your logging message. Possible values: debug, info, silly, warn, error (default is "info"). If want to investigate some problem with Manet, use "debug" level: --level=debug</dd>
 
   <dt>--cors</dt>
   <dd>Enable <a href="http://www.w3.org/TR/cors/">Cross-Origin Resource Sharing</a> (default is false).</dd>
@@ -131,7 +137,7 @@ Rules of overriding:
   <dd>Number of milliseconds to wait for the program to complete before sending it `SIGTERM` (default is 60000).</dd>
 
   <dt>--options:{option}</dt>
-  <dd>Default query parameters. See also "Query parameters" for more details. Example: "--options:width 101"</dd>
+  <dd>Default query parameters. See also "Query parameters" for more details. Example: "--options:width 101".</dd>
 
 </dl>
 
@@ -143,16 +149,19 @@ Default configuration file *("default.json")*:
 
 ```json
 {
-    "cache": 3600,
     "port": 8891,
     "cors": false,
     "ui": true,
 
     "silent": false,
-    "level": "debug",
+    "level": "info",
 
     "engine": "phantomjs",
+    "options": {},
     "timeout": 60000,
+    "compress": false,
+    "cache": 3600,
+    "cleanup": false,
 
     "commands": {
         "slimerjs": {
@@ -174,7 +183,6 @@ Default configuration file *("default.json")*:
     "whitelist": [
         ".*"
     ]
-
 }
 ```
 
@@ -214,7 +222,7 @@ Few rules:
   <dd>Zoom factor of the webpage display. Setting a value to this property decreases or increases the size of the web page rendering. A value between 0 and 1 decreases the size of the page, and a value higher than 1 increases its size. 1 means no zoom (normal size). (default: 1).</dd>
 
   <dt>quality</dt>
-  <dd>The compression quality. A number between 0 and 1 (default value: 1).</dd>
+  <dd>The compression quality. A number between 0 and 1 (default value: 1). Quality parameter doesn't work for PNG file format.</dd>
 
   <dt>delay</dt>
   <dd>Do a pause during the given amount of time (in milliseconds) after page opening (default: 100).</dd>

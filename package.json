@@ -1,6 +1,6 @@
 {
     "name": "manet",
-    "version": "0.2.9",
+    "version": "0.3.7",
     "description": "Website screenshot service powered by Node.js, SlimerJS and PhantomJS",
     "license": "MIT",
 
@@ -49,22 +49,27 @@
     },
 
     "dependencies": {
-        "express": "^4.10.6",
+        "express": "^4.10.7",
         "request": "^2.51.0",
-        "body-parser": "^1.10.0",
-        "helmet": "^0.5.3",
-        "fs-extra": "^0.13.0",
-        "exec": "^0.1.2",
+        "body-parser": "^1.10.1",
+        "helmet": "^0.7.0",
+        "fs-extra": "^0.17.0",
+        "exec": "^0.2.0",
         "nconf": "^0.7.1",
-        "joi": "^5.0.2",
+        "joi": "^6.0.3",
         "qs": "^2.3.3",
-        "lodash": "^2.4.1",
-        "winston": "^0.8.3"
+        "lodash": "^3.0.0",
+        "winston": "^0.9.0",
+        "imagemin": "^3.1.0",
+        "imagemin-gifsicle": "^4.0.0",
+        "imagemin-jpegtran": "^4.0.0",
+        "imagemin-optipng": "^4.0.0",
+        "imagemin-svgo": "^4.0.0"
     },
 
     "devDependencies": {
-        "jshint": "^2.5.10",
-        "mocha": "^2.0.1",
+        "jshint": "^2.5.11",
+        "mocha": "^2.1.0",
         "w3cjs": "^0.1.25"
     }
 }
