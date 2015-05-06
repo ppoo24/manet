@@ -161,8 +161,22 @@
                     exit();
                 } else {
                     try {
-                        addStyles(page, DEF_STYLES);
-                        renderScreenshotFile(page, options, outputFile, onFinish);
+						//ws->Wait for all resources are ready
+						var checkReadyState = function () {
+							setTimeout(function () {
+								var readyState = page.evaluate(function () { return document.readyState; });
+								if ('complete' === readyState) {
+									addStyles(page, DEF_STYLES);
+									renderScreenshotFile(page, options, outputFile, onFinish);
+								} else {
+									checkReadyState();
+								}
+							}, 200);
+						}
+						checkReadyState();
+						//<-ws
+                        // addStyles(page, DEF_STYLES); //ws=
+						// renderScreenshotFile(page, options, outputFile, onFinish); //ws=
                     } catch (e) {
                         onFinish(page, e);
                     }
