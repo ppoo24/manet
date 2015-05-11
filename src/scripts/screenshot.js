@@ -3,6 +3,10 @@
 "use strict";
 
     /* Modules & Constants */
+	
+	//ws->
+	var DEF_PAGELOAD_TIMEOUT = 60 * 5; //(seconds) timeout of waiting the page's full loading
+	//<-ws
 
     var DEF_ZOOM = 1,
         DEF_QUALITY = 1,
@@ -162,9 +166,20 @@
                 } else {
                     try {
 						//ws->Wait for all resources are ready
+						//page.evaluate(function () { //not work if page takes long time！！！
+						//	window.onload = function () { window.manet_page_loaded = 'test'; };
+						//});
+						// //not work if page takes long time！！！
+						//page.evaluateJavaScript('function() { window.onload = function () { window.manet_page_loaded = 1; }; }');
+						
+						var tryTimes = 0, maxTry = 5 * DEF_PAGELOAD_TIMEOUT; //max try of 300 times(max time waste: 2 * 60000ms=2 * 60s=2min)
 						var checkReadyState = function () {
+							if (tryTimes >= maxTry) { throw new Error('Timeout occured after tried more times wish to get readyState == complete'); }
+							tryTimes ++;
+							log('[Wait for onload]: tried ' + tryTimes + ' times');
 							setTimeout(function () {
 								var readyState = page.evaluate(function () { return document.readyState; });
+								//var loaded = page.evaluate(function () { return window.manet_page_loaded; });
 								if ('complete' === readyState) {
 									addStyles(page, DEF_STYLES);
 									renderScreenshotFile(page, options, outputFile, onFinish);
@@ -175,6 +190,7 @@
 						}
 						checkReadyState();
 						//<-ws
+						
                         // addStyles(page, DEF_STYLES); //ws=
 						// renderScreenshotFile(page, options, outputFile, onFinish); //ws=
                     } catch (e) {
