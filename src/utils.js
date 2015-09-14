@@ -93,6 +93,21 @@ function execProcess(command, options, onClose) {
     exec(command, opts, function(err, out, code) {
         logger.debug('Process output: %s', out);
 
+		//ws->exec这个库，仅仅在err是Error对象时，才代表命令执行失败，所以这里有err并不一定失败
+		if (err) { logger.warn('Process error: %s', err); }
+		if (err instanceof Error) { logger.error('Command execution FATAL ERROR: %s', err.message); }
+		else {
+			var procEnd = process.hrtime(procStart),
+                end = (procEnd[0] + procEnd[1] / 1e9).toFixed(2);
+
+            logger.debug('Execution time: %d sec', end);
+
+            if (onClose) {
+                onClose(code);
+            }
+		}
+		//<-ws
+		/*->ws 不严谨的代码
         if (err) {
             logger.error('Process error: %s', err);
         } else {
@@ -105,6 +120,7 @@ function execProcess(command, options, onClose) {
                 onClose(code);
             }
         }
+		*/
     });
 }
 

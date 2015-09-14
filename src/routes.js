@@ -144,6 +144,9 @@ function sendImageToUrl(options) {
 
 function index(config) {
     return function (req, res) {
+		//ws->设置超时值，避免断开连接
+		res.setTimeout(config.timeout);
+		//<-ws
         var schema = createSchema(),
             data = utils.validate(req.data, schema);
 

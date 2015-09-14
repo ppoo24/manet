@@ -190,7 +190,6 @@
 						}
 						checkReadyState();
 						//<-ws
-						
                         // addStyles(page, DEF_STYLES); //ws=
 						// renderScreenshotFile(page, options, outputFile, onFinish); //ws=
                     } catch (e) {
